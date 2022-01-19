@@ -28,9 +28,9 @@
         <span>Hour</span>
         <span>Minute</span>
         <span>Second</span>
-        <input type="number" value="0" class="hour time">
-        <input type="number" value="0" class="minute time">
-        <input type="number" value="0" class="second time">
+        <input type="number" class="hour time">
+        <input type="number" class="minute time">
+        <input type="number" class="second time">
     </div>
     <div>
         <span>Total time : </span>
@@ -58,17 +58,14 @@
             var h = document.createElement('input');
             h.setAttribute('type', 'number');
             h.classList.add('hour', 'time');
-            h.value = 0;
 
             var m = document.createElement('input');
             m.setAttribute('type', 'number');
             m.classList.add('minute', 'time');
-            m.value = 0;
 
             var s = document.createElement('input');
             s.setAttribute('type', 'number');
             s.classList.add('second', 'time');
-            s.value = 0;
 
             times.appendChild(h);
             times.appendChild(m);
