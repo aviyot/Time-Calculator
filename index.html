@@ -12,25 +12,39 @@
             width: 100%;
             height: 100%;
             margin: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .times {
             display: grid;
             grid-template-columns: 80px 80px 80px;
             font-size: large;
+            gap: 0.5rem;
 
         }
 
         .times input {
-            font-size: x-large;
+            font-size: large;
+        }
+
+        .times span {
+            text-align: center;
         }
 
         .btns {
             display: flex;
             justify-content: start;
             gap: 1rem;
-            font-size: x-large;
-            padding: 1rem;
+            margin: 1rem;
+
+        }
+
+        .btns button {
+            font-size: large;
+            padding: 0.2rem 1rem;
         }
 
         .result {
@@ -41,13 +55,14 @@
 </head>
 
 <body>
+    <h1>Time Calculator</h1>
     <div class="times">
         <span>Hour</span>
         <span>Minute</span>
         <span>Second</span>
-        <input type="number" class="hour time">
-        <input type="number" class="minute time">
-        <input type="number" class="second time">
+        <input type="number" class="hour time" placeholder="hour">
+        <input type="number" class="minute time" placeholder="minute">
+        <input type="number" class="second time" placeholder="second">
     </div>
     <div class="result">
         <span>Total time : </span>
@@ -74,14 +89,17 @@
 
             var h = document.createElement('input');
             h.setAttribute('type', 'number');
+            h.setAttribute('placeholder', 'hour')
             h.classList.add('hour', 'time');
 
             var m = document.createElement('input');
             m.setAttribute('type', 'number');
+            m.setAttribute('placeholder', 'minute')
             m.classList.add('minute', 'time');
 
             var s = document.createElement('input');
             s.setAttribute('type', 'number');
+            s.setAttribute('placeholder', 'second')
             s.classList.add('second', 'time');
 
             times.appendChild(h);
