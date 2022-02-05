@@ -141,8 +141,10 @@
             if (curTarget.value.length == 2) {
                 if (curTarget.nextSibling)
                     ev.currentTarget.nextSibling.focus();
-                else
+                else {
                     document.querySelector('#calc-time-btn').focus();
+                    calcTotalTime();
+                }
             }
         }
         function addTime() {
