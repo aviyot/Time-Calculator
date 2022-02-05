@@ -96,9 +96,6 @@
                 <span>Hour</span>
                 <span>Minute</span>
                 <span>Second</span>
-                <input type="number" class="hour time" placeholder="hour">
-                <input type="number" class="minute time" placeholder="minute">
-                <input type="number" class="second time" placeholder="second">
             </div>
             <button class="btn" id="add-time-btn">Add</button>
 
@@ -130,6 +127,8 @@
             document.querySelector("#calc-texarea-method").addEventListener('click', calcTotalTimeText);
             document.getElementById('inputs').addEventListener('click', selectCalcMethod);
             document.getElementById('text').addEventListener('click', selectCalcMethod);
+
+            addTime();
 
         }
         init();
