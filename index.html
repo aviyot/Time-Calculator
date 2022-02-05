@@ -129,10 +129,20 @@
             document.getElementById('text').addEventListener('click', selectCalcMethod);
 
             addTime();
+            addTime();
 
         }
         init();
 
+        function moveNextTab(ev) {
+            const curTarget = ev.currentTarget;
+            if (curTarget.value.length == 2) {
+                if (curTarget.nextSibling)
+                    ev.currentTarget.nextSibling.focus();
+                else
+                    document.querySelector('#calc-time-btn').focus();
+            }
+        }
         function addTime() {
             var times = document.querySelector('.times');
 
@@ -140,20 +150,28 @@
             h.setAttribute('type', 'number');
             h.setAttribute('placeholder', 'hour')
             h.classList.add('hour', 'time');
+            h.addEventListener('input', moveNextTab)
 
             var m = document.createElement('input');
             m.setAttribute('type', 'number');
             m.setAttribute('placeholder', 'minute')
             m.classList.add('minute', 'time');
+            m.addEventListener('input', moveNextTab)
+
 
             var s = document.createElement('input');
             s.setAttribute('type', 'number');
             s.setAttribute('placeholder', 'second')
             s.classList.add('second', 'time');
+            s.addEventListener('input', moveNextTab)
+
 
             times.appendChild(h);
             times.appendChild(m);
             times.appendChild(s);
+
+            h.focus();
+
         }
 
         function calcTotalTime() {
