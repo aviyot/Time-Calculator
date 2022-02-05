@@ -128,8 +128,10 @@
             document.getElementById('inputs').addEventListener('click', selectCalcMethod);
             document.getElementById('text').addEventListener('click', selectCalcMethod);
 
+            const frist = addTime();
             addTime();
-            addTime();
+
+            frist.h.focus();
 
         }
         init();
@@ -171,6 +173,12 @@
             times.appendChild(s);
 
             h.focus();
+
+            return {
+                h,
+                m,
+                s
+            }
 
         }
 
