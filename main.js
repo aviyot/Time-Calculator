@@ -1,5 +1,5 @@
 function init() {
-  document.querySelector("#add-time-btn").addEventListener("click", addTime);
+  document.querySelector("#add-time-btn").addEventListener("click", addTimes);
   document
     .querySelector("#calc-time-btn")
     .addEventListener("click", calcTotalTime);
@@ -159,4 +159,14 @@ function selectCalcMethod(ev) {
     textarea_method.style.order = "1";
     inputs_method.style.order = "3";
   }
+}
+
+function addTimes() {
+  var ntime = document.querySelector("#ntime");
+  var n = +ntime.value;
+  for (let index = 0; index < n; index++) {
+    addTime();
+  }
+
+  ntime.value = 1;
 }
