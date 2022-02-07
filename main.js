@@ -14,6 +14,7 @@ function onInputValue(ev) {
   const curTarget = ev.currentTarget;
   if (curTarget.value.length == 2) {
     if (curTarget.nextSibling) ev.currentTarget.nextSibling.focus();
+    else curTarget.blur();
   }
   calcTotalTime();
 }
