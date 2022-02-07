@@ -1,9 +1,6 @@
 function init() {
   document.querySelector("#add-time-btn").addEventListener("click", addTimes);
   document
-    .querySelector("#calc-time-btn")
-    .addEventListener("click", calcTotalTime);
-  document
     .querySelector("#calc-texarea-method")
     .addEventListener("click", calcTotalTimeText);
   document.getElementById("inputs").addEventListener("click", selectCalcMethod);
@@ -13,15 +10,12 @@ function init() {
 }
 init();
 
-function moveNextTab(ev) {
+function onInputValue(ev) {
   const curTarget = ev.currentTarget;
   if (curTarget.value.length == 2) {
     if (curTarget.nextSibling) ev.currentTarget.nextSibling.focus();
-    else {
-      document.querySelector("#calc-time-btn").focus();
-      calcTotalTime();
-    }
   }
+  calcTotalTime();
 }
 function addTime() {
   var times = document.querySelector(".times");
@@ -30,19 +24,19 @@ function addTime() {
   h.setAttribute("type", "number");
   h.setAttribute("placeholder", "hh");
   h.classList.add("hour", "time");
-  h.addEventListener("input", moveNextTab);
+  h.addEventListener("input", onInputValue);
 
   var m = document.createElement("input");
   m.setAttribute("type", "number");
   m.setAttribute("placeholder", "mm");
   m.classList.add("minute", "time");
-  m.addEventListener("input", moveNextTab);
+  m.addEventListener("input", onInputValue);
 
   var s = document.createElement("input");
   s.setAttribute("type", "number");
   s.setAttribute("placeholder", "ss");
   s.classList.add("second", "time");
-  s.addEventListener("input", moveNextTab);
+  s.addEventListener("input", onInputValue);
 
   times.appendChild(h);
   times.appendChild(m);
@@ -173,4 +167,5 @@ function addTimes(ev, n) {
   }
 
   ntime.value = 1;
+  calcTotalTime();
 }
