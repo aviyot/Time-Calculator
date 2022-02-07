@@ -23,7 +23,7 @@ body {
 }
 
 .border_b {
-  border-bottom: 4px orange solid;
+  border: 2px orange solid;
 }
 
 .times {
@@ -34,10 +34,8 @@ body {
 }
 
 .times input {
+  width: 3em;
   font-size: large;
-}
-
-.times span {
   text-align: center;
 }
 

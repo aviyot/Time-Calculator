@@ -28,19 +28,19 @@ function addTime() {
 
   var h = document.createElement("input");
   h.setAttribute("type", "number");
-  h.setAttribute("placeholder", "hour");
+  h.setAttribute("placeholder", "hh");
   h.classList.add("hour", "time");
   h.addEventListener("input", moveNextTab);
 
   var m = document.createElement("input");
   m.setAttribute("type", "number");
-  m.setAttribute("placeholder", "minute");
+  m.setAttribute("placeholder", "mm");
   m.classList.add("minute", "time");
   m.addEventListener("input", moveNextTab);
 
   var s = document.createElement("input");
   s.setAttribute("type", "number");
-  s.setAttribute("placeholder", "second");
+  s.setAttribute("placeholder", "ss");
   s.classList.add("second", "time");
   s.addEventListener("input", moveNextTab);
 
