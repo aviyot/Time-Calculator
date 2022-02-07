@@ -9,10 +9,7 @@ function init() {
   document.getElementById("inputs").addEventListener("click", selectCalcMethod);
   document.getElementById("text").addEventListener("click", selectCalcMethod);
 
-  const frist = addTime();
-  addTime();
-
-  frist.h.focus();
+  addTimes(null, 2);
 }
 init();
 
@@ -161,11 +158,18 @@ function selectCalcMethod(ev) {
   }
 }
 
-function addTimes() {
+function addTimes(ev, n) {
+  let fristTime = null;
   var ntime = document.querySelector("#ntime");
-  var n = +ntime.value;
-  for (let index = 0; index < n; index++) {
+  if (n === undefined) n = +ntime.value;
+
+  if (n > 0) fristTime = addTime().h;
+
+  for (let i = 1; i < n; i++) {
     addTime();
+  }
+  if (fristTime) {
+    fristTime.focus();
   }
 
   ntime.value = 1;
