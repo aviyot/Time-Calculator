@@ -84,6 +84,8 @@ function resetAllTimes() {
   seconds.forEach((second) => {
     second.value = "";
   });
+
+  calcTotalTime();
 }
 
 function deleteAllTimes() {
