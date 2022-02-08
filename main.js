@@ -8,6 +8,10 @@ function init() {
   document
     .querySelector("#reset-times-btn")
     .addEventListener("click", resetAllTimes);
+  //deleteAllTimes
+  document
+    .querySelector("#del-times-btn")
+    .addEventListener("click", deleteAllTimes);
 
   addTimes(null, 2);
 }
@@ -80,6 +84,22 @@ function resetAllTimes() {
   seconds.forEach((second) => {
     second.value = "";
   });
+}
+
+function deleteAllTimes() {
+  const { houres, minutes, seconds } = getTimesRef();
+  houres.forEach((hour) => {
+    hour.parentNode.removeChild(hour);
+  });
+
+  minutes.forEach((minute) => {
+    minute.parentNode.removeChild(minute);
+  });
+
+  seconds.forEach((second) => {
+    second.parentNode.removeChild(second);
+  });
+  calcTotalTime();
 }
 
 function calcTotalTime() {
