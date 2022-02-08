@@ -5,6 +5,9 @@ function init() {
     .addEventListener("click", calcTotalTimeText);
   document.getElementById("inputs").addEventListener("click", selectCalcMethod);
   document.getElementById("text").addEventListener("click", selectCalcMethod);
+  document
+    .querySelector("#reset-times-btn")
+    .addEventListener("click", resetAllTimes);
 
   addTimes(null, 2);
 }
@@ -52,10 +55,35 @@ function addTime() {
   };
 }
 
-function calcTotalTime() {
+function getTimesRef() {
   var houres = document.querySelectorAll(".hour");
   var minutes = document.querySelectorAll(".minute");
   var seconds = document.querySelectorAll(".second");
+
+  return {
+    houres,
+    minutes,
+    seconds,
+  };
+}
+
+function resetAllTimes() {
+  const { houres, minutes, seconds } = getTimesRef();
+  houres.forEach((hour) => {
+    hour.value = "";
+  });
+
+  minutes.forEach((minute) => {
+    minute.value = "";
+  });
+
+  seconds.forEach((second) => {
+    second.value = "";
+  });
+}
+
+function calcTotalTime() {
+  const { houres, minutes, seconds } = getTimesRef();
   var calcResult = document.querySelector("#calc-result");
   var totalHoures = 0;
   var totalMinutes = 0;
