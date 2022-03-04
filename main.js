@@ -1,3 +1,7 @@
+let hourDisabled = false;
+let minuteDisabled = false;
+let secondDisabled = false;
+
 function init() {
   document.querySelector("#add-time-btn").addEventListener("click", addTimes);
   document
@@ -14,14 +18,29 @@ function init() {
     .addEventListener("click", deleteAllTimes);
 
   addTimes(null, 2);
+
+  let hourTogRef = document.querySelector("#hourTog");
+  let minuteTogRef = document.querySelector("#minuteTog");
+  let secondTogRef = document.querySelector("#secondTog");
+
+  hourTogRef.addEventListener("click", toogleHour);
+  minuteTogRef.addEventListener("click", toogleMinute);
+  secondTogRef.addEventListener("click", toogleSecond);
 }
 init();
 
 function onInputValue(ev) {
   const curTarget = ev.currentTarget;
   if (curTarget.value.length == 2) {
-    if (curTarget.nextSibling) ev.currentTarget.nextSibling.focus();
-    else curTarget.blur();
+    if (curTarget.nextSibling) {
+      if (!ev.currentTarget.nextSibling.disabled) {
+        ev.currentTarget.nextSibling.focus();
+      } else {
+        if (ev.currentTarget.nextSibling.nextSibling)
+          ev.currentTarget.nextSibling.nextSibling.focus();
+        else ev.currentTarget.nextSibling.blur();
+      }
+    } else curTarget.blur();
   }
   calcTotalTime();
 }
@@ -32,18 +51,21 @@ function addTime() {
   h.setAttribute("type", "number");
   h.setAttribute("placeholder", "hh");
   h.classList.add("hour", "time");
+  if (hourDisabled) h.disabled = true;
   h.addEventListener("input", onInputValue);
 
   var m = document.createElement("input");
   m.setAttribute("type", "number");
   m.setAttribute("placeholder", "mm");
   m.classList.add("minute", "time");
+  if (minuteDisabled) m.disabled = true;
   m.addEventListener("input", onInputValue);
 
   var s = document.createElement("input");
   s.setAttribute("type", "number");
   s.setAttribute("placeholder", "ss");
   s.classList.add("second", "time");
+  if (secondDisabled) s.disabled = true;
   s.addEventListener("input", onInputValue);
 
   times.appendChild(h);
@@ -219,4 +241,33 @@ function addTimes(ev, n) {
 
   ntime.value = 1;
   calcTotalTime();
+}
+
+function toogleHour() {
+  const hourTimes = document.querySelectorAll(".hour");
+
+  hourTimes.forEach((hourTime) => {
+    hourTime.disabled = !hourDisabled;
+  });
+
+  hourDisabled = !hourDisabled;
+}
+
+function toogleMinute() {
+  const minuteTimes = document.querySelectorAll(".minute");
+
+  minuteTimes.forEach((minuteTime) => {
+    minuteTime.disabled = !minuteDisabled;
+  });
+
+  minuteDisabled = !minuteDisabled;
+}
+
+function toogleSecond() {
+  const secondsTimes = document.querySelectorAll(".second");
+
+  secondsTimes.forEach((secondsTime) => {
+    secondsTime.disabled = !secondDisabled;
+  });
+  secondDisabled = !secondDisabled;
 }
