@@ -48,11 +48,14 @@ body {
 
 .result {
   font-size: x-large;
-  margin-top: 1.5rem;
+  margin: 1rem;
+  position: sticky;
+  top: 2px;
+  background-color: ghostwhite;
 }
 
 .btn {
-  font-size: large;
+  font-size: 1rem;
   padding: 0.2rem 1rem;
   margin: 0.2rem;
 }

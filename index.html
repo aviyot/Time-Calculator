@@ -11,35 +11,33 @@
 
 <body>
     <div class="flex-col">
-        <div id="inputs-method" class="flex-col">
-            <div>
-                <button class="btn" id="hourTog">H</button>
-                <button class="btn" id="minuteTog">M</button>
-                <button class="btn" id="secondTog">S</button>
-            </div>
-            <div class="times">
-                <span>Hour</span>
-                <span>Minute</span>
-                <span>Second</span>
-            </div>
-            <div>
-                <div>
-                    <input id="ntime" class="ntime" type="number" value="1" />
-                    <button class="btn" id="add-time-btn">Add</button>
-                </div>
-
-                <div>
-                    <button class="btn" id="reset-times-btn">Clear All</button>
-                    <button class="btn" id="del-times-btn">Delete All</button>
-                </div>
-
-            </div>
-
-        </div>
-        <div id="result" class="flex-col result">
-            <span>Total time </span>
+        <div id="result" class="flex-col result" style="width: 100%;">
+            <span>Total Time </span>
             <span id="calc-result"></span>
         </div>
+        <div>
+            <button class="btn" id="reset-times-btn">Clear All</button>
+            <button class="btn" id="del-times-btn">Delete All</button>
+        </div>
+        <div class="times">
+            <button class="btn" id="hourTog"><span>H</span></button>
+            <button class="btn" id="minuteTog"><span>M</span></button>
+            <button class="btn" id="secondTog"><span>S</span></button>
+        </div>
+        <div class="times">
+
+        </div>
+        <div>
+            <div>
+                <input id="ntime" class="ntime" type="number" value="1" />
+                <button class="btn" id="add-time-btn">Add</button>
+            </div>
+
+
+
+        </div>
+
+
 
     </div>
     <script src="./main.js"></script>
