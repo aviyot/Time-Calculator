@@ -10,17 +10,12 @@
 </head>
 
 <body>
-    <h1>Time Calculator</h1>
-    <div class="row-space">
-        <button id="inputs" class="border_b btn">fields</button>
-        <button id="text" class="btn">text</button>
-    </div>
     <div class="flex-col">
         <div id="inputs-method" class="flex-col">
             <div>
-                <button id="hourTog">H</button>
-                <button id="minuteTog">M</button>
-                <button id="secondTog">S</button>
+                <button class="btn" id="hourTog">H</button>
+                <button class="btn" id="minuteTog">M</button>
+                <button class="btn" id="secondTog">S</button>
             </div>
             <div class="times">
                 <span>Hour</span>
@@ -45,14 +40,7 @@
             <span>Total time </span>
             <span id="calc-result"></span>
         </div>
-        <div id="textarea-method" class="flex-col" style="visibility: hidden;">
-            <div class="flex-col">
-                <label>Enter On Format</label>
-                <label>HHMMSS HHMMSS ...</label>
-            </div>
-            <textarea id="time-enter" row="1" oninput="auto_grow(this)"></textarea>
-            <button class="btn" id="calc-texarea-method">Calc</button>
-        </div>
+
     </div>
     <script src="./main.js"></script>
 

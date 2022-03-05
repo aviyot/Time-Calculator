@@ -4,11 +4,7 @@ let secondDisabled = false;
 
 function init() {
   document.querySelector("#add-time-btn").addEventListener("click", addTimes);
-  document
-    .querySelector("#calc-texarea-method")
-    .addEventListener("click", calcTotalTimeText);
-  document.getElementById("inputs").addEventListener("click", selectCalcMethod);
-  document.getElementById("text").addEventListener("click", selectCalcMethod);
+
   document
     .querySelector("#reset-times-btn")
     .addEventListener("click", resetAllTimes);
@@ -179,50 +175,6 @@ function padStart(val) {
 function auto_grow(element) {
   element.style.height = "5px";
   element.style.height = element.scrollHeight + "px";
-}
-
-function calcTotalTimeText() {
-  var calcResult = document.querySelector("#calc-result");
-
-  var totalTime = 0;
-  var time_enter = document.querySelector("#time-enter").value;
-
-  times = time_enter.split(" ");
-  times.forEach((time) => {
-    totalTime += +(time.slice(0, 2) * 60 * 60);
-    totalTime += +(time.slice(2, 4) * 60);
-    totalTime += +time.slice(4, 6);
-  });
-
-  calcResult.textContent = convertSecondsToTime(totalTime);
-}
-
-function selectCalcMethod(ev) {
-  var inputs = document.getElementById("inputs");
-  var text = document.getElementById("text");
-  var result = document.getElementById("result");
-
-  var inputs_method = document.getElementById("inputs-method");
-  var textarea_method = document.getElementById("textarea-method");
-
-  result.style.order = "2";
-
-  if (ev.currentTarget.id == "inputs") {
-    inputs.classList.add("border_b");
-    text.classList.remove("border_b");
-    inputs_method.style.visibility = "visible";
-    textarea_method.style.visibility = "hidden";
-    textarea_method.style.order = "3";
-    inputs_method.style.order = "1";
-  }
-  if (ev.currentTarget.id == "text") {
-    text.classList.add("border_b");
-    inputs.classList.remove("border_b");
-    textarea_method.style.visibility = "visible";
-    inputs_method.style.visibility = "hidden";
-    textarea_method.style.order = "1";
-    inputs_method.style.order = "3";
-  }
 }
 
 function addTimes(ev, n) {
