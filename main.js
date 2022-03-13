@@ -1,6 +1,7 @@
 let hourDisabled = false;
 let minuteDisabled = false;
 let secondDisabled = false;
+let timeElements = [];
 
 function init() {
   document.querySelector("#add-time-btn").addEventListener("click", addTimes);
@@ -27,14 +28,19 @@ init();
 
 function onInputValue(ev) {
   const curTarget = ev.currentTarget;
+
+  const activeElement = timeElements.findIndex((te) => {
+    return document.activeElement === te;
+  });
+
   if (curTarget.value.length == 2) {
-    if (curTarget.nextSibling) {
-      if (!ev.currentTarget.nextSibling.disabled) {
-        ev.currentTarget.nextSibling.focus();
+    if (timeElements[activeElement + 1]) {
+      if (!timeElements[activeElement + 1].disabled) {
+        timeElements[activeElement + 1].focus();
       } else {
-        if (ev.currentTarget.nextSibling.nextSibling)
-          ev.currentTarget.nextSibling.nextSibling.focus();
-        else ev.currentTarget.nextSibling.blur();
+        if (timeElements[activeElement + 2])
+          timeElements[activeElement + 2].focus();
+        else timeElements[activeElement + 1].blur();
       }
     } else curTarget.blur();
   }
@@ -42,6 +48,8 @@ function onInputValue(ev) {
 }
 function addTime() {
   var times = document.querySelector(".times");
+  var timeWarp = document.createElement("div");
+  timeWarp.classList.add("time-warp");
 
   var h = document.createElement("input");
   h.setAttribute("type", "number");
@@ -64,11 +72,23 @@ function addTime() {
   if (secondDisabled) s.disabled = true;
   s.addEventListener("input", onInputValue);
 
-  times.appendChild(h);
-  times.appendChild(m);
-  times.appendChild(s);
+  var mul = document.createElement("input");
+  mul.setAttribute("type", "number");
+  mul.value = "1";
+  mul.classList.add("mul");
+  mul.addEventListener("input", onInputValue);
+
+  timeWarp.appendChild(h);
+  timeWarp.appendChild(m);
+  timeWarp.appendChild(s);
+  timeWarp.appendChild(mul);
+  times.appendChild(timeWarp);
 
   h.focus();
+
+  timeElements.push(h);
+  timeElements.push(m);
+  timeElements.push(s);
 
   return {
     h,
@@ -77,69 +97,41 @@ function addTime() {
   };
 }
 
-function getTimesRef() {
-  var houres = document.querySelectorAll(".hour");
-  var minutes = document.querySelectorAll(".minute");
-  var seconds = document.querySelectorAll(".second");
-
-  return {
-    houres,
-    minutes,
-    seconds,
-  };
-}
-
 function resetAllTimes() {
-  const { houres, minutes, seconds } = getTimesRef();
-  houres.forEach((hour) => {
-    hour.value = "";
-  });
+  var times = document.querySelectorAll(".time-warp");
 
-  minutes.forEach((minute) => {
-    minute.value = "";
-  });
-
-  seconds.forEach((second) => {
-    second.value = "";
+  times.forEach((time) => {
+    time.querySelector(".hour").value = "";
+    time.querySelector(".minute").value = "";
+    time.querySelector(".second").value = "";
+    time.querySelector(".mul").value = "1";
   });
 
   calcTotalTime();
 }
 
 function deleteAllTimes() {
-  const { houres, minutes, seconds } = getTimesRef();
-  houres.forEach((hour) => {
-    hour.parentNode.removeChild(hour);
+  var times = document.querySelectorAll(".time-warp");
+
+  times.forEach((time) => {
+    time.parentNode.removeChild(time);
   });
 
-  minutes.forEach((minute) => {
-    minute.parentNode.removeChild(minute);
-  });
-
-  seconds.forEach((second) => {
-    second.parentNode.removeChild(second);
-  });
+  timeElements = [];
   calcTotalTime();
 }
 
 function calcTotalTime() {
-  const { houres, minutes, seconds } = getTimesRef();
   var calcResult = document.querySelector("#calc-result");
-  var totalHoures = 0;
-  var totalMinutes = 0;
-  var totalSeconds = 0;
   var totalTimeOnSeconds = 0;
+  var times = document.querySelectorAll(".time-warp");
+  times.forEach((time) => {
+    var hour = +time.querySelector(".hour").value;
+    var minute = +time.querySelector(".minute").value;
+    var second = +time.querySelector(".second").value;
+    var mul = +time.querySelector(".mul").value;
 
-  houres.forEach((hour) => {
-    totalTimeOnSeconds += +hour.value * 60 * 60;
-  });
-
-  minutes.forEach((minute) => {
-    totalTimeOnSeconds += +minute.value * 60;
-  });
-
-  seconds.forEach((second) => {
-    totalTimeOnSeconds += +second.value;
+    totalTimeOnSeconds += (hour * 60 * 60 + minute * 60 + second) * mul;
   });
 
   calcResult.textContent = convertSecondsToTime(totalTimeOnSeconds);

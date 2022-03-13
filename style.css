@@ -26,13 +26,6 @@ body {
   border: 2px orange solid;
 }
 
-.times {
-  display: grid;
-  grid-template-columns: 80px 80px 80px;
-  font-size: large;
-  gap: 0.5rem;
-}
-
 .times input {
   width: 3em;
   font-size: large;
