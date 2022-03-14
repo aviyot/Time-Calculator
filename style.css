@@ -79,10 +79,10 @@ body {
 
 .time-warp {
   display: grid;
-  grid-template-columns: 3em 3em 3em 3em 3em;
+  grid-template-columns: 60px 60px 60px 60px 60px;
 }
 
 .times-btns {
   display: grid;
-  grid-template-columns: 3em 3em 3em 3em 3em;
+  grid-template-columns: 60px 60px 60px 60px 60px;
 }
