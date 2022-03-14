@@ -23,6 +23,13 @@ function init() {
   hourTogRef.addEventListener("click", toogleHour);
   minuteTogRef.addEventListener("click", toogleMinute);
   secondTogRef.addEventListener("click", toogleSecond);
+
+  let del = document.querySelectorAll(".del");
+  del.forEach((delEl) => {
+    delEl.addEventListener("click", deleteTime);
+  });
+
+  calcTotalTime();
 }
 init();
 
@@ -40,9 +47,9 @@ function onInputValue(ev) {
       } else {
         if (timeElements[activeElement + 2])
           timeElements[activeElement + 2].focus();
-        else timeElements[activeElement + 1].blur();
+        else document.querySelector("#add-time-btn").focus();
       }
-    } else curTarget.blur();
+    } else document.querySelector("#add-time-btn").focus();
   }
   calcTotalTime();
 }
@@ -78,10 +85,17 @@ function addTime() {
   mul.classList.add("mul");
   mul.addEventListener("input", onInputValue);
 
+  var del = document.createElement("input");
+  del.setAttribute("type", "button");
+  del.value = "x";
+  del.classList.add("del");
+  del.addEventListener("click", deleteTime);
+
   timeWarp.appendChild(h);
   timeWarp.appendChild(m);
   timeWarp.appendChild(s);
   timeWarp.appendChild(mul);
+  timeWarp.appendChild(del);
   times.appendChild(timeWarp);
 
   h.focus();
@@ -110,6 +124,12 @@ function resetAllTimes() {
   calcTotalTime();
 }
 
+function deleteTime(ev) {
+  const curTarget = ev.currentTarget;
+
+  curTarget.parentNode.parentNode.removeChild(curTarget.parentNode);
+  calcTotalTime();
+}
 function deleteAllTimes() {
   var times = document.querySelectorAll(".time-warp");
 

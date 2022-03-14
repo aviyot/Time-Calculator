@@ -67,3 +67,22 @@ body {
   font-size: large;
   text-align: center;
 }
+
+.del {
+  color: red;
+  padding: 1px;
+}
+
+#mulTog {
+  color: blue;
+}
+
+.time-warp {
+  display: grid;
+  grid-template-columns: 3em 3em 3em 3em 3em;
+}
+
+.times-btns {
+  display: grid;
+  grid-template-columns: 3em 3em 3em 3em 3em;
+}
