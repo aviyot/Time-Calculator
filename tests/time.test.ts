@@ -4,9 +4,10 @@ import {
   calculateTotalSeconds,
   formatTime,
   getFriendlyTimeDesc,
-} from "../lib/time.js";
+} from "../lib/time";
+import type { TimeColumns } from "../lib/time";
 
-const allColumns = {
+const allColumns: TimeColumns = {
   hour: true,
   minute: true,
   second: true,

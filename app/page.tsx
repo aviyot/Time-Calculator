@@ -1,26 +1,31 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, CSSProperties } from "react";
 import {
   calculateTotalSeconds,
   formatTime,
   getFriendlyTimeDesc,
-} from "../lib/time.js";
+} from "../lib/time";
+import type { TimeColumns, TimeField, TimeValues } from "../lib/time";
 
-const timeFields = [
+type TimeRow = TimeValues & { id: number };
+type DurationField = Exclude<TimeField, "multiplier">;
+
+const timeFields: { key: DurationField; label: string; placeholder: string }[] = [
   { key: "hour", label: "Hours", placeholder: "hh" },
   { key: "minute", label: "Minutes", placeholder: "mm" },
   { key: "second", label: "Seconds", placeholder: "ss" },
 ];
 
-const toggleFields = [
+const toggleFields: { key: TimeField; label: string; id: string }[] = [
   { key: "hour", label: "Hours", id: "hourTog" },
   { key: "minute", label: "Minutes", id: "minuteTog" },
   { key: "second", label: "Seconds", id: "secondTog" },
   { key: "multiplier", label: "Multiplier", id: "mulTog" },
 ];
 
-function createRow(id) {
+function createRow(id: number): TimeRow {
   return { id, hour: "", minute: "", second: "", multiplier: "1" };
 }
 
@@ -44,8 +49,8 @@ function TrashIcon() {
 }
 
 export default function Home() {
-  const [rows, setRows] = useState(() => [createRow(0), createRow(1)]);
-  const [columns, setColumns] = useState({
+  const [rows, setRows] = useState<TimeRow[]>(() => [createRow(0), createRow(1)]);
+  const [columns, setColumns] = useState<TimeColumns>({
     hour: true,
     minute: true,
     second: true,
@@ -53,8 +58,8 @@ export default function Home() {
   });
   const [addCount, setAddCount] = useState("1");
   const nextRowId = useRef(2);
-  const pendingFocusRow = useRef(0);
-  const timesRef = useRef(null);
+  const pendingFocusRow = useRef<number | null>(0);
+  const timesRef = useRef<HTMLDivElement>(null);
 
   const gridTemplate = [
     columns.hour && "1fr",
@@ -66,6 +71,10 @@ export default function Home() {
   ]
     .filter(Boolean)
     .join(" ");
+
+  const gridStyle: CSSProperties & { "--grid-template": string } = {
+    "--grid-template": gridTemplate,
+  };
 
   const timesClassName = [
     "times-container",
@@ -85,11 +94,11 @@ export default function Home() {
     const row = timesRef.current?.querySelector(
       `[data-row-id="${pendingFocusRow.current}"]`,
     );
-    row?.querySelector("input.time:not(:disabled)")?.focus();
+    row?.querySelector<HTMLInputElement>("input.time:not(:disabled)")?.focus();
     pendingFocusRow.current = null;
   }, [rows]);
 
-  function updateRow(id, field, event) {
+  function updateRow(id: number, field: TimeField, event: ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget;
 
     if ((field === "minute" || field === "second") && input.value.length > 2) {
@@ -102,9 +111,10 @@ export default function Home() {
     );
 
     if (field !== "multiplier" && value.length === 2) {
-      const inputs = Array.from(
-        input.closest(".time-warp").querySelectorAll("input.time"),
-      );
+      const row = input.closest(".time-warp");
+      if (!row) throw new Error("Time input is not inside a row");
+
+      const inputs = Array.from(row.querySelectorAll<HTMLInputElement>("input.time"));
       const currentIndex = inputs.indexOf(input);
       const nextInput = inputs.slice(currentIndex + 1).find((item) => !item.disabled);
       nextInput?.focus();
@@ -113,7 +123,7 @@ export default function Home() {
 
   function addRows() {
     const count = +addCount || 1;
-    const newRows = [];
+    const newRows: TimeRow[] = [];
 
     for (let i = 0; i < count; i++) {
       newRows.push(createRow(nextRowId.current++));
@@ -130,7 +140,7 @@ export default function Home() {
     setRows((currentRows) => currentRows.map((row) => createRow(row.id)));
   }
 
-  function toggleColumn(key) {
+  function toggleColumn(key: TimeField) {
     setColumns((currentColumns) => ({
       ...currentColumns,
       [key]: !currentColumns[key],
@@ -176,7 +186,7 @@ export default function Home() {
         <div
           id="times-wrapper"
           className={timesClassName}
-          style={{ "--grid-template": gridTemplate }}
+          style={gridStyle}
         >
           <div className="grid-header">
             {timeFields.map(({ key, label }) => (

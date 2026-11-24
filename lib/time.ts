@@ -1,4 +1,11 @@
-export function calculateTotalSeconds(rows, columns) {
+export type TimeField = "hour" | "minute" | "second" | "multiplier";
+export type TimeValues = Record<TimeField, string>;
+export type TimeColumns = Record<TimeField, boolean>;
+
+export function calculateTotalSeconds(
+  rows: readonly TimeValues[],
+  columns: TimeColumns,
+): number {
   return rows.reduce((total, row) => {
     const hours = columns.hour ? +row.hour : 0;
     const minutes = columns.minute ? +row.minute : 0;
@@ -11,11 +18,11 @@ export function calculateTotalSeconds(rows, columns) {
   }, 0);
 }
 
-function padZero(value) {
+function padZero(value: number): string | number {
   return value < 10 ? "0" + value : value;
 }
 
-export function formatTime(totalSeconds) {
+export function formatTime(totalSeconds: number): string {
   const remainder = totalSeconds % 3600;
 
   return (
@@ -27,7 +34,7 @@ export function formatTime(totalSeconds) {
   );
 }
 
-export function getFriendlyTimeDesc(totalSeconds) {
+export function getFriendlyTimeDesc(totalSeconds: number): string {
   if (totalSeconds === 0) return "0 hours, 0 minutes, 0 seconds";
 
   const hours = Math.floor(totalSeconds / 3600);
