@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ChangeEvent, CSSProperties } from "react";
 import {
   calculateTotalSeconds,
@@ -11,6 +11,10 @@ import type { TimeColumns, TimeField, TimeValues } from "../lib/time";
 
 type TimeRow = TimeValues & { id: number };
 type DurationField = Exclude<TimeField, "multiplier">;
+type ActiveMenu =
+  | { type: "row"; rowId: number; anchorRect: DOMRect }
+  | { type: "global"; anchorRect: DOMRect }
+  | null;
 
 const timeFields: { key: DurationField; label: string; placeholder: string }[] = [
   { key: "hour", label: "Hours", placeholder: "hh" },
@@ -18,15 +22,31 @@ const timeFields: { key: DurationField; label: string; placeholder: string }[] =
   { key: "second", label: "Seconds", placeholder: "ss" },
 ];
 
-const toggleFields: { key: TimeField; label: string; id: string }[] = [
-  { key: "hour", label: "Hours", id: "hourTog" },
-  { key: "minute", label: "Minutes", id: "minuteTog" },
-  { key: "second", label: "Seconds", id: "secondTog" },
-  { key: "multiplier", label: "Multiplier", id: "mulTog" },
-];
-
 function createRow(id: number): TimeRow {
   return { id, hour: "", minute: "", second: "", multiplier: "1" };
+}
+
+function getMultiplierBadge(multiplier: string): string | null {
+  const value = +multiplier;
+  if (!Number.isNaN(value) && value > 0 && value !== 1) {
+    return `×${value}`;
+  }
+  return null;
+}
+
+function DotsIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="19" r="2" />
+    </svg>
+  );
 }
 
 function TrashIcon() {
@@ -56,18 +76,17 @@ export default function Home() {
     second: true,
     multiplier: true,
   });
-  const [addCount, setAddCount] = useState("1");
+  const [activeMenu, setActiveMenu] = useState<ActiveMenu>(null);
   const nextRowId = useRef(2);
   const pendingFocusRow = useRef<number | null>(0);
   const timesRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const gridTemplate = [
     columns.hour && "1fr",
     columns.minute && "1fr",
     columns.second && "1fr",
-    columns.multiplier && "auto",
-    columns.multiplier && "0.8fr",
-    "44px",
+    "auto",
   ]
     .filter(Boolean)
     .join(" ");
@@ -81,12 +100,16 @@ export default function Home() {
     !columns.hour && "hide-hours",
     !columns.minute && "hide-minutes",
     !columns.second && "hide-seconds",
-    !columns.multiplier && "hide-mul",
   ]
     .filter(Boolean)
     .join(" ");
 
   const totalSeconds = calculateTotalSeconds(rows, columns);
+
+  const activeRow =
+    activeMenu?.type === "row"
+      ? rows.find((row) => row.id === activeMenu.rowId) ?? null
+      : null;
 
   useEffect(() => {
     if (pendingFocusRow.current === null) return;
@@ -97,6 +120,49 @@ export default function Home() {
     row?.querySelector<HTMLInputElement>("input.time:not(:disabled)")?.focus();
     pendingFocusRow.current = null;
   }, [rows]);
+
+  useEffect(() => {
+    if (!activeMenu) return;
+
+    function handleClose() {
+      setActiveMenu(null);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setActiveMenu(null);
+      }
+    }
+
+    document.addEventListener("click", handleClose);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("click", handleClose);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeMenu]);
+
+  useLayoutEffect(() => {
+    const menu = menuRef.current;
+    if (!activeMenu || !menu) return;
+
+    const { anchorRect } = activeMenu;
+    const menuRect = menu.getBoundingClientRect();
+    const gap = 6;
+
+    let top = anchorRect.bottom + gap;
+    if (top + menuRect.height > window.innerHeight - 8) {
+      top = Math.max(8, anchorRect.top - menuRect.height - gap);
+    }
+
+    let left = anchorRect.right - menuRect.width;
+    if (left < 8) {
+      left = 8;
+    }
+
+    menu.style.top = `${top}px`;
+    menu.style.left = `${left}px`;
+  }, [activeMenu]);
 
   function updateRow(id: number, field: TimeField, event: ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget;
@@ -117,34 +183,73 @@ export default function Home() {
       const inputs = Array.from(row.querySelectorAll<HTMLInputElement>("input.time"));
       const currentIndex = inputs.indexOf(input);
       const nextInput = inputs.slice(currentIndex + 1).find((item) => !item.disabled);
-      nextInput?.focus();
+      if (nextInput) {
+        nextInput.focus();
+      } else {
+        const currentRowIndex = rows.findIndex((item) => item.id === id);
+        const nextRow = currentRowIndex >= 0 ? rows[currentRowIndex + 1] : undefined;
+        if (nextRow) {
+          const nextRowEl = timesRef.current?.querySelector(
+            `[data-row-id="${nextRow.id}"]`,
+          );
+          nextRowEl?.querySelector<HTMLInputElement>("input.time:not(:disabled)")?.focus();
+        } else {
+          const newRow = createRow(nextRowId.current++);
+          pendingFocusRow.current = newRow.id;
+          setRows((currentRows) => [...currentRows, newRow]);
+        }
+      }
     }
   }
 
-  function addRows() {
-    const count = +addCount || 1;
-    const newRows: TimeRow[] = [];
-
-    for (let i = 0; i < count; i++) {
-      newRows.push(createRow(nextRowId.current++));
+  function normalizeRowMultiplier(id: number, rawValue: string) {
+    const parsed = +rawValue;
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      setRows((currentRows) =>
+        currentRows.map((row) =>
+          row.id === id ? { ...row, multiplier: "1" } : row,
+        ),
+      );
     }
+  }
 
-    if (newRows.length > 0) {
-      pendingFocusRow.current = newRows[0].id;
-      setRows((currentRows) => [...currentRows, ...newRows]);
-    }
-    setAddCount("1");
+  function addRow() {
+    const newRow = createRow(nextRowId.current++);
+    pendingFocusRow.current = newRow.id;
+    setRows((currentRows) => [...currentRows, newRow]);
   }
 
   function clearRows() {
+    setActiveMenu(null);
     setRows((currentRows) => currentRows.map((row) => createRow(row.id)));
   }
 
-  function toggleColumn(key: TimeField) {
+  function deleteAllRows() {
+    setActiveMenu(null);
+    setRows([]);
+  }
+
+  function toggleColumn(key: DurationField) {
     setColumns((currentColumns) => ({
       ...currentColumns,
       [key]: !currentColumns[key],
     }));
+  }
+
+  function toggleRowMenu(rowId: number, button: HTMLButtonElement) {
+    const anchorRect = button.getBoundingClientRect();
+    setActiveMenu((current) =>
+      current?.type === "row" && current.rowId === rowId
+        ? null
+        : { type: "row", rowId, anchorRect },
+    );
+  }
+
+  function toggleGlobalMenu(button: HTMLButtonElement) {
+    const anchorRect = button.getBoundingClientRect();
+    setActiveMenu((current) =>
+      current?.type === "global" ? null : { type: "global", anchorRect },
+    );
   }
 
   return (
@@ -168,12 +273,12 @@ export default function Home() {
         </div>
 
         <div className="toggle-bar">
-          {toggleFields.map(({ key, label, id }) => (
+          {timeFields.map(({ key, label }) => (
             <button
               key={key}
               type="button"
               className={`toggle-btn${columns[key] ? " active" : ""}`}
-              id={id}
+              id={`${key}Tog`}
               title={`Toggle ${label}`}
               aria-pressed={columns[key]}
               onClick={() => toggleColumn(key)}
@@ -187,70 +292,56 @@ export default function Home() {
           id="times-wrapper"
           className={timesClassName}
           style={gridStyle}
+          onScroll={() => setActiveMenu(null)}
         >
-          <div className="grid-header">
-            {timeFields.map(({ key, label }) => (
-              <div key={key} className={`header-cell ${key}-col`}>
-                {label}
-              </div>
-            ))}
-            <div className="header-cell mul-col mul-col-sym" />
-            <div className="header-cell mul-col">Multiplier</div>
-            <div className="header-cell del-col" />
-          </div>
-
           <div className="times" ref={timesRef}>
-            {rows.map((row, index) => (
-              <div className="time-warp" data-row-id={row.id} key={row.id}>
-                {timeFields.map(({ key, label, placeholder }) => (
-                  <input
-                    key={key}
-                    type="number"
-                    placeholder={placeholder}
-                    aria-label={`${label} for row ${index + 1}`}
-                    className={`${key}-col ${key} time`}
-                    disabled={!columns[key]}
-                    value={row[key]}
-                    onChange={(event) => updateRow(row.id, key, event)}
-                  />
-                ))}
-                <span className="mul-symbol mul-col mul-col-sym">×</span>
-                <input
-                  type="number"
-                  aria-label={`Multiplier for row ${index + 1}`}
-                  className="mul-col mul"
-                  disabled={!columns.multiplier}
-                  value={row.multiplier}
-                  onChange={(event) => updateRow(row.id, "multiplier", event)}
-                />
-                <button
-                  type="button"
-                  className="del-btn del-col"
-                  aria-label={`Delete row ${index + 1}`}
-                  onClick={() =>
-                    setRows((currentRows) =>
-                      currentRows.filter((currentRow) => currentRow.id !== row.id),
-                    )
-                  }
-                >
-                  <TrashIcon />
-                </button>
-              </div>
-            ))}
+            {rows.map((row, index) => {
+              const badge = getMultiplierBadge(row.multiplier);
+              const isRowMenuOpen =
+                activeMenu?.type === "row" && activeMenu.rowId === row.id;
+
+              return (
+                <div className="time-warp" data-row-id={row.id} key={row.id}>
+                  {timeFields.map(({ key, label, placeholder }) => (
+                    <input
+                      key={key}
+                      type="number"
+                      placeholder={placeholder}
+                      aria-label={`${label} for row ${index + 1}`}
+                      className={`${key}-col ${key} time`}
+                      disabled={!columns[key]}
+                      value={row[key]}
+                      onChange={(event) => updateRow(row.id, key, event)}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    className={`row-menu-btn${isRowMenuOpen ? " open" : ""}`}
+                    title="Row actions"
+                    aria-label={`Row ${index + 1} actions`}
+                    aria-haspopup="menu"
+                    aria-expanded={isRowMenuOpen}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleRowMenu(row.id, event.currentTarget);
+                    }}
+                  >
+                    {badge && <span className="mul-badge">{badge}</span>}
+                    <DotsIcon />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         <div className="add-row-section">
-          <input
-            id="ntime"
-            className="add-count-input"
-            type="number"
-            min="1"
-            aria-label="Number of rows to add"
-            value={addCount}
-            onChange={(event) => setAddCount(event.target.value)}
-          />
-          <button type="button" className="primary-btn" id="add-time-btn" onClick={addRows}>
+          <button
+            type="button"
+            className="primary-btn"
+            id="add-time-btn"
+            onClick={addRow}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -265,15 +356,85 @@ export default function Home() {
                 d="M12 4.5v15m7.5-7.5h-15"
               />
             </svg>
-            <span>Add Rows</span>
+            <span>Add Row</span>
           </button>
-        </div>
-
-        <div className="action-row">
           <button
             type="button"
-            className="secondary-btn clear-btn"
+            id="global-menu-btn"
+            className={`global-menu-btn${activeMenu?.type === "global" ? " open" : ""}`}
+            title="More actions"
+            aria-label="More actions"
+            aria-haspopup="menu"
+            aria-expanded={activeMenu?.type === "global"}
+            onClick={(event) => {
+              event.stopPropagation();
+              toggleGlobalMenu(event.currentTarget);
+            }}
+          >
+            <DotsIcon />
+          </button>
+        </div>
+      </div>
+
+      {activeMenu?.type === "row" && activeRow && (
+        <div
+          id="row-menu"
+          ref={menuRef}
+          className="row-menu"
+          role="menu"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <label className="row-menu-item row-menu-mul-row" htmlFor="row-menu-mul">
+            <span>Multiplier</span>
+            <div className="row-menu-mul-wrap">
+              <span className="mul-symbol">×</span>
+              <input
+                id="row-menu-mul"
+                className="row-menu-mul-input"
+                type="number"
+                min="1"
+                step="any"
+                value={activeRow.multiplier}
+                onChange={(event) => updateRow(activeRow.id, "multiplier", event)}
+                onBlur={(event) =>
+                  normalizeRowMultiplier(activeRow.id, event.currentTarget.value)
+                }
+              />
+            </div>
+          </label>
+          <div className="row-menu-divider" />
+          <button
+            type="button"
+            id="row-menu-delete"
+            className="row-menu-item row-menu-delete"
+            role="menuitem"
+            onClick={() => {
+              const rowId = activeRow.id;
+              setActiveMenu(null);
+              setRows((currentRows) =>
+                currentRows.filter((currentRow) => currentRow.id !== rowId),
+              );
+            }}
+          >
+            <TrashIcon />
+            <span>Delete Row</span>
+          </button>
+        </div>
+      )}
+
+      {activeMenu?.type === "global" && (
+        <div
+          id="global-menu"
+          ref={menuRef}
+          className="row-menu"
+          role="menu"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
             id="reset-times-btn"
+            className="row-menu-item row-menu-clear"
+            role="menuitem"
             onClick={clearRows}
           >
             <svg
@@ -292,17 +453,19 @@ export default function Home() {
             </svg>
             <span>Clear Values</span>
           </button>
+          <div className="row-menu-divider" />
           <button
             type="button"
-            className="secondary-btn delete-all-btn"
             id="del-times-btn"
-            onClick={() => setRows([])}
+            className="row-menu-item row-menu-delete"
+            role="menuitem"
+            onClick={deleteAllRows}
           >
             <TrashIcon />
             <span>Delete All</span>
           </button>
         </div>
-      </div>
+      )}
     </>
   );
 }
